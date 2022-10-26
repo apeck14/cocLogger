@@ -1,6 +1,8 @@
 const { readdirSync } = require("fs")
 const { schedule } = require("node-cron")
 const mongo = require("./src/util/mongo")
+
+require("dotenv").config()
 mongo.init()
 
 const { Client, Intents } = require("discord.js")
