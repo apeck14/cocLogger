@@ -15,7 +15,7 @@ module.exports = {
 		//loop through all members
 		//loop through members of each member
 
-		const clan = await getClan("9U82JJ0Y").catch(console.log)
+		const clan = await getClan("9UV202Q2").catch(console.log)
 		if (!clan) return
 
 		const { memberList } = clan
