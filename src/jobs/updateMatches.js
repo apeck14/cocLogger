@@ -195,7 +195,7 @@ module.exports = {
 			try {
 				const allBattles = await snipeLogs.find({ tag: m.team.tag }).toArray()
 				const battlesToday = allBattles.filter(isToday)
-				const attacksRemaining = 4 - battlesToday.length
+				const attacksRemaining = 4 - battlesToday.length - m.team.cards / 8
 
 				//send match info
 				await client.channels.cache
