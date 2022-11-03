@@ -1,4 +1,4 @@
-const { getClan, getBattleLog } = require("../util/api")
+const { getClan, getBattleLog, getRiverRace } = require("../util/api")
 const { LOGS_CHANNEL_ID } = require("../../config")
 const { parseDate } = require("../util/functions")
 const specialGameModes = require("../static/specialGamemodes")
@@ -15,12 +15,15 @@ module.exports = {
 		//loop through all members
 		//loop through members of each member
 
+		const race = await getRiverRace("9UV202Q2").catch(console.log)
 		const clan = await getClan("9UV202Q2").catch(console.log)
 		if (!clan) return
 
 		const { memberList } = clan
 
 		const matchQueue = []
+
+		const snipeTags = ["#CYQ9RGQ0", "#2L0VR8UGU", "#2G0CPRL80", "#PP89022G0", "#LUJJYCL02", "#908LGPY9V", "#2CUQ92UY9", "#GVR88C0V", "#P0CQCPVCC"]
 
 		for (const m of memberList) {
 			const log = await getBattleLog(m.tag)
@@ -164,8 +167,16 @@ module.exports = {
 
 		for (const m of matchQueue) {
 			try {
+				const attacksRemaining = 4 - race.clan.participants.find((p) => p.tag === m.team.tag).decksUsedToday
+
 				//send match info
-				await client.channels.cache.get(LOGS_CHANNEL_ID).send(`**${m.team.name} (CRL)** vs. **${m.opponent.clanName}** :arrow_down:`)
+				await client.channels.cache
+					.get(LOGS_CHANNEL_ID)
+					.send(
+						`**${m.team.name} (CRL)** vs. **${m.opponent.clanName}** :arrow_down:\nAttacks Remaining: **${attacksRemaining}**${
+							snipeTags.includes(m.team.tag) ? `\n<@229658027450564609>\n<@951891780029251604>\n<@493245767448789023>\n<@696884661552545864>` : ""
+						}`
+					)
 
 				//send image
 				await client.channels.cache.get(LOGS_CHANNEL_ID).send({ files: [await createMatchImg(m)] })
