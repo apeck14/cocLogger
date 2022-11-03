@@ -195,7 +195,13 @@ module.exports = {
 			try {
 				const allBattles = await snipeLogs.find({ "team.tag": m.team.tag }).toArray()
 				const battlesToday = allBattles.filter(isToday)
-				const attacksRemaining = 4 - battlesToday.length - m.team.cards.length / 8
+				let totalBattlesToday = 0
+
+				for (const b of battlesToday) {
+					totalBattlesToday += b.team.cards / 8
+				}
+
+				const attacksRemaining = 4 - totalBattlesToday - m.team.cards.length / 8
 
 				//send match info
 				await client.channels.cache
@@ -212,7 +218,7 @@ module.exports = {
 				await client.channels.cache.get(LOGS_CHANNEL_ID).send({ files: [await createMatchImg(m)] })
 
 				//add to database
-				snipeLogs.insertOne(m)
+				await snipeLogs.insertOne(m)
 			} catch (e) {
 				console.log(e)
 			}
