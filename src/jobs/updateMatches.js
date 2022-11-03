@@ -174,7 +174,9 @@ module.exports = {
 					.get(LOGS_CHANNEL_ID)
 					.send(
 						`**${m.team.name} (CRL)** vs. **${m.opponent.clanName}** :arrow_down:\nAttacks Remaining: **${attacksRemaining}**${
-							snipeTags.includes(m.team.tag) ? `\n<@229658027450564609>\n<@951891780029251604>\n<@493245767448789023>\n<@696884661552545864>` : ""
+							snipeTags.includes(m.team.tag) && attacksRemaining > 0
+								? `\n<@229658027450564609>\n<@951891780029251604>\n<@493245767448789023>\n<@696884661552545864>`
+								: ""
 						}`
 					)
 
