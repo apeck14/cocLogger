@@ -5,7 +5,7 @@ const specialGameModes = require("../static/specialGamemodes")
 const createMatchImg = require("../util/createMatchImgs")
 
 module.exports = {
-	expression: "*/2 * * * *", //every 2 mins
+	expression: "* * * * *", //every min
 	run: async (client, db) => {
 		console.log("Updating matches...")
 
@@ -165,9 +165,37 @@ module.exports = {
 
 		matchQueue.sort((a, b) => parseDate(a.timestamp) - parseDate(b.timestamp))
 
+		const isToday = (m) => {
+			const now = new Date()
+			const currentHour = now.getUTCHours()
+			const currentMinute = now.getUTCMinutes()
+
+			//utc is 5 hours ahead
+
+			const getDate = () => {
+				const date = new Date()
+				const day = date.getUTCDate()
+
+				if (currentHour > 9 && currentMinute > 45) {
+					return day < 10 ? `0${day}` : day
+				}
+
+				date.setUTCDate(day - 1)
+
+				const newDay = date.getUTCDate()
+				return newDay < 10 ? `0${newDay}` : newDay
+			}
+
+			const lastReset = new Date(`${now.getUTCFullYear()}-${now.getUTCMonth() + 1}-${getDate()}T09:45:00.000Z`)
+
+			return parseDate(m.timestamp) > lastReset
+		}
+
 		for (const m of matchQueue) {
 			try {
-				const attacksRemaining = 4 - race.clan.participants.find((p) => p.tag === m.team.tag).decksUsedToday
+				const allBattles = await snipeLogs.find({ tag: m.team.tag }).toArray()
+				const battlesToday = allBattles.filter(isToday)
+				const attacksRemaining = 4 - battlesToday.length
 
 				//send match info
 				await client.channels.cache
