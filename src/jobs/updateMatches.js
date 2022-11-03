@@ -193,7 +193,7 @@ module.exports = {
 
 		for (const m of matchQueue) {
 			try {
-				const allBattles = await snipeLogs.find({ tag: m.team.tag }).toArray()
+				const allBattles = await snipeLogs.find({ "team.tag": m.team.tag }).toArray()
 				const battlesToday = allBattles.filter(isToday)
 				const attacksRemaining = 4 - battlesToday.length - m.team.cards.length / 8
 
