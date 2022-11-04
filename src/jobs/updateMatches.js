@@ -23,7 +23,20 @@ module.exports = {
 
 		const matchQueue = []
 
-		const snipeTags = ["#CYQ9RGQ0", "#2L0VR8UGU", "#2G0CPRL80", "#PP89022G0", "#LUJJYCL02", "#908LGPY9V", "#2CUQ92UY9", "#GVR88C0V", "#P0CQCPVCC"]
+		const snipeTags = [
+			"#CYQ9RGQ0",
+			"#2L0VR8UGU",
+			"#2G0CPRL80",
+			"#PP89022G0",
+			"#LUJJYCL02",
+			"#908LGPY9V",
+			"#2CUQ92UY9",
+			"#GVR88C0V",
+			"#P0CQCPVCC",
+			"#L9Y2U2JYQ",
+			"#98CLRPJ8",
+			"#YVYPYVVYY",
+		]
 
 		for (const m of memberList) {
 			const log = await getBattleLog(m.tag)
