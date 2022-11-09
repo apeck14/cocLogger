@@ -1,42 +1,26 @@
-const { getClan, getBattleLog, getRiverRace } = require("../util/api")
+const { getClan, getBattleLog } = require("../util/api")
 const { LOGS_CHANNEL_ID } = require("../../config")
 const { parseDate } = require("../util/functions")
 const specialGameModes = require("../static/specialGamemodes")
 const createMatchImg = require("../util/createMatchImgs")
 
 module.exports = {
-	expression: "* * * * *", //every min
+	expression: "*/4 * * * *", //every 4 mins
 	run: async (client, db) => {
 		console.log("Updating matches...")
 
-		const snipeLogs = db.collection("CRL Snipe Logs")
+		const afamLogs = db.collection("AFam Logs")
 
 		//get member list
 		//loop through all members
 		//loop through members of each member
 
-		const race = await getRiverRace("9UV202Q2").catch(console.log)
-		const clan = await getClan("9UV202Q2").catch(console.log)
+		const clan = await getClan("V2GQU").catch(console.log)
 		if (!clan) return
 
 		const { memberList } = clan
 
 		const matchQueue = []
-
-		const snipeTags = [
-			"#CYQ9RGQ0",
-			"#2L0VR8UGU",
-			"#2G0CPRL80",
-			"#PP89022G0",
-			"#LUJJYCL02",
-			"#908LGPY9V",
-			"#2CUQ92UY9",
-			"#GVR88C0V",
-			"#P0CQCPVCC",
-			"#L9Y2U2JYQ",
-			"#98CLRPJ8",
-			"#YVYPYVVYY",
-		]
 
 		for (const m of memberList) {
 			const log = await getBattleLog(m.tag)
@@ -168,7 +152,7 @@ module.exports = {
 					//check if from our clan
 					if (player.clan.tag !== clan.tag) continue
 					//check if already in database
-					const matchFound = await snipeLogs.findOne({ "team.tag": m.tag, timestamp: b.battleTime })
+					const matchFound = await afamLogs.findOne({ "team.tag": m.tag, timestamp: b.battleTime })
 					if (matchFound) continue
 
 					matchQueue.push(match)
@@ -178,58 +162,16 @@ module.exports = {
 
 		matchQueue.sort((a, b) => parseDate(a.timestamp) - parseDate(b.timestamp))
 
-		const isToday = (m) => {
-			const now = new Date()
-			const currentHour = now.getUTCHours()
-			const currentMinute = now.getUTCMinutes()
-
-			//utc is 5 hours ahead
-
-			const getDate = () => {
-				const date = new Date()
-				const day = date.getUTCDate()
-
-				if (currentHour > 9 && currentMinute > 45) {
-					return day < 10 ? `0${day}` : day
-				}
-
-				date.setUTCDate(day - 1)
-
-				const newDay = date.getUTCDate()
-				return newDay < 10 ? `0${newDay}` : newDay
-			}
-
-			const lastReset = new Date(`${now.getUTCFullYear()}-${now.getUTCMonth() + 1}-${getDate()}T09:45:00.000Z`)
-
-			return parseDate(m.timestamp) > lastReset
-		}
-
 		for (const m of matchQueue) {
 			try {
-				const allBattles = await snipeLogs.find({ "team.tag": m.team.tag }).toArray()
-				const battlesToday = allBattles.filter(isToday)
-				let totalBattlesToday = 0
-
-				for (const b of battlesToday) {
-					totalBattlesToday += b.team.cards / 8
-				}
-
-				const attacksRemaining = 4 - totalBattlesToday - m.team.cards.length / 8
-
 				//send match info
-				await client.channels.cache
-					.get(LOGS_CHANNEL_ID)
-					.send(
-						`**${m.team.name} (CRL)** vs. **${m.opponent.clanName}** :arrow_down:\nAttacks Remaining: **${attacksRemaining}**${
-							snipeTags.includes(m.team.tag) ? `\n<@229658027450564609>\n<@951891780029251604>\n<@493245767448789023>\n<@696884661552545864>` : ""
-						}`
-					)
+				await client.channels.cache.get(LOGS_CHANNEL_ID).send(`**${m.team.name}** vs. **${m.opponent.clanName}** :arrow_down:`)
 
 				//send image
 				await client.channels.cache.get(LOGS_CHANNEL_ID).send({ files: [await createMatchImg(m)] })
 
 				//add to database
-				await snipeLogs.insertOne(m)
+				afamLogs.insertOne(m)
 			} catch (e) {
 				console.log(e)
 			}
